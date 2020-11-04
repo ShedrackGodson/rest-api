@@ -6,3 +6,4 @@ class BlogPostSerializer(serializers.ModelSerializer): # forms.ModelForm
     class Meta:
         model = BlogPost
         fields = ['pk', 'user', 'title', 'content', 'timestamp']
+        read_only_fields = ["pk", "timestamp"]

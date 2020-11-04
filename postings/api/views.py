@@ -6,6 +6,7 @@ from postings.models import BlogPost
 class BlogPostRudView(generics.RetrieveUpdateDestroyAPIView):
     lookup_field = "pk"
     serializer_class = BlogPostSerializer
+    # form = AddBlogPostForm()
 
     def get_queryset(self):
         return BlogPost.objects.all()
