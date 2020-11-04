@@ -3,6 +3,13 @@ from rest_framework import generics
 from postings.models import BlogPost
 
 
+class BlogPostListView(generics.ListAPIView):
+    serializer_class = BlogPostSerializer
+
+    def get_queryset(self):
+        return BlogPost.objects.all()
+
+
 class BlogPostView(generics.CreateAPIView):
     lookup_field = "pk"
     serializer_class = BlogPostSerializer
