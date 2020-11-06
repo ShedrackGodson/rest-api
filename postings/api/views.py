@@ -1,4 +1,5 @@
 from .serializer import BlogPostSerializer
+from .permissions import IsOwnerOrReadOnly
 from rest_framework import generics, mixins
 from postings.models import BlogPost
 from django.db.models import Q
@@ -11,7 +12,10 @@ class BlogPostListView(mixins.CreateModelMixin, generics.ListAPIView):
         qs = BlogPost.objects.all()
         query = self.request.GET.get("q")
         if query is not None:
-            qs = qs.filter(Q(title__icontains=query) | Q(content__icontains=query)).distinct()
+            qs = qs.filter(
+                Q(title__icontains=query)| # title lookup
+                Q(content__icontains=query)).\
+                distinct() # content lookup
         return qs
     
     def post(self, request, *args, **kwargs): # Giving the ListAPIView ability to Create
@@ -19,7 +23,10 @@ class BlogPostListView(mixins.CreateModelMixin, generics.ListAPIView):
 
     def perform_create(self, serializer):
         serializer.save(user = self.request.user)
-        
+    
+    def get_serializer_context(self, *args, **kwargs):
+        return {"request": self.request}
+    
     # def put(self, request, *args, **kwargs): # Giving the ListAPIView ability to Create
     #     return self.update(request, *args, **kwargs)
     
@@ -54,10 +61,14 @@ class BlogPostUpdateView(generics.UpdateAPIView):
 class BlogPostRudView(generics.RetrieveUpdateDestroyAPIView):
     lookup_field = "pk"
     serializer_class = BlogPostSerializer
+    permission_classes = [IsOwnerOrReadOnly]
     # form = AddBlogPostForm()
 
     def get_queryset(self):
         return BlogPost.objects.all()
+    
+    def get_serializer_context(self, *args, **kwargs):
+        return {"request": self.request}
     
     # def get_object(self):
     #     pk = self.kwargs.get("pk")
